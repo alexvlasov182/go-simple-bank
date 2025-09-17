@@ -70,6 +70,7 @@ make test
 ```
 
 ## Useful Commands
+```bash
 make postgres     # Start PostgreSQL with Docker
 make createdb     # Create DB
 make dropdb       # Drop DB
@@ -77,3 +78,4 @@ make migrateup    # Apply migrations
 make migratedown  # Rollback migrations
 make server       # Run API server
 make test         # Run unit tests
+```
