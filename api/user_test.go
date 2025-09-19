@@ -11,14 +11,15 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"testing"
+	"time"
 
 	db "backend/go-simple-bank/db/sqlc"
-
 	"backend/go-simple-bank/util"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang/mock/gomock"
+	"github.com/lib/pq"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/mock/gomock"
 )
 
 type eqCreateUserParamsMatcher struct {
@@ -29,6 +30,11 @@ type eqCreateUserParamsMatcher struct {
 func (e eqCreateUserParamsMatcher) Matches(x interface{}) bool {
 	arg, ok := x.(db.CreateUserParams)
 	if !ok {
+		return false
+	}
+
+	err := util.CheckPassword(e.password, arg.HashedPassword)
+	if err != nil {
 		return false
 	}
 
@@ -106,7 +112,8 @@ func TestCreateUserAPI(t *testing.T) {
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
 					CreateUser(gomock.Any(), gomock.Any()).
-					Times(1)
+					Times(1).
+					Return(db.User{}, &pq.Error{Code: "23505"}) // PostgreSQL unique violation error
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusForbidden, recorder.Code)
@@ -172,22 +179,22 @@ func TestCreateUserAPI(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			// store := mockdb.NewMockStore(ctrl)
-			// tc.buildStubs(store)
+			store := mockdb.NewMockStore(ctrl)
+			tc.buildStubs(store)
 
-			// server := newTestServer(t, store)
-			// recorder := httptest.NewRecorder()
+			server := newTestServer(t, store)
+			recorder := httptest.NewRecorder()
 
-			// // Marshal body data to JSON
-			// data, err := json.Marshal(tc.body)
-			// require.NoError(t, err)
+			// Marshal body data to JSON
+			data, err := json.Marshal(tc.body)
+			require.NoError(t, err)
 
-			// url := "/users"
-			// request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
-			// require.NoError(t, err)
+			url := "/users"
+			request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
+			require.NoError(t, err)
 
-			// server.router.ServeHTTP(recorder, request)
-			// tc.checkResponse(recorder)
+			server.router.ServeHTTP(recorder, request)
+			tc.checkResponse(recorder)
 		})
 	}
 }
@@ -212,7 +219,6 @@ func TestLoginUserAPI(t *testing.T) {
 					GetUser(gomock.Any(), gomock.Eq(user.Username)).
 					Times(1).
 					Return(user, nil)
-				store.EXPECT()
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -227,7 +233,8 @@ func TestLoginUserAPI(t *testing.T) {
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
 					GetUser(gomock.Any(), gomock.Any()).
-					Times(1)
+					Times(1).
+					Return(db.User{}, sql.ErrNoRows)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusNotFound, recorder.Code)
@@ -289,22 +296,22 @@ func TestLoginUserAPI(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			// store := mockdb.NewMockStore(ctrl)
-			// tc.buildStubs(store)
+			store := mockdb.NewMockStore(ctrl)
+			tc.buildStubs(store)
 
-			// server := newTestServer(t, store)
-			// recorder := httptest.NewRecorder()
+			server := newTestServer(t, store)
+			recorder := httptest.NewRecorder()
 
-			// // Marshal body data to JSON
-			// data, err := json.Marshal(tc.body)
-			// require.NoError(t, err)
+			// Marshal body data to JSON
+			data, err := json.Marshal(tc.body)
+			require.NoError(t, err)
 
-			// url := "/users/login"
-			// request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
-			// require.NoError(t, err)
+			url := "/users/login"
+			request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
+			require.NoError(t, err)
 
-			// server.router.ServeHTTP(recorder, request)
-			// tc.checkResponse(recorder)
+			server.router.ServeHTTP(recorder, request)
+			tc.checkResponse(recorder)
 		})
 	}
 }
@@ -327,12 +334,12 @@ func requireBodyMatchUser(t *testing.T, body *bytes.Buffer, user db.User) {
 	data, err := io.ReadAll(body)
 	require.NoError(t, err)
 
-	var gotUser db.User
+	var gotUser createUserResponse
 	err = json.Unmarshal(data, &gotUser)
 
 	require.NoError(t, err)
 	require.Equal(t, user.Username, gotUser.Username)
 	require.Equal(t, user.FullName, gotUser.FullName)
 	require.Equal(t, user.Email, gotUser.Email)
-	require.Empty(t, gotUser.HashedPassword)
+	require.WithinDuration(t, user.CreatedAt, gotUser.CreatedAt, time.Second)
 }
