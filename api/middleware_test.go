@@ -20,7 +20,7 @@ func addAuthorization(
 	tokenMaker token.Maker,
 	authorizationType string,
 	username string,
-	role string,
+	_ string,
 	duration time.Duration,
 ) {
 	token, err := tokenMaker.CreateToken(username, duration)
