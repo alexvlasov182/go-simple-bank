@@ -44,4 +44,11 @@ jobs:
       run: make migrateup
 
     - name: Test
+      env:
+        DB_DRIVER: postgres
+        DB_SOURCE: ${{ secrets.DB_SOURCE }}
+        SERVER_ADDRESS: 0.0.0.0:8080
+        TOKEN_SYMMETRIC_KEY: ${{ secrets.TOKEN_SYMMETRIC_KEY }}
+        ACCESS_TOKEN_DURATION: 15m
+        REFRESH_TOKEN_DURATION: 24h
       run: make test
