@@ -28,7 +28,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
@@ -40,8 +40,17 @@ jobs:
         sudo mv migrate /usr/local/bin/
         which migrate
 
+    - name: Create app.env from secrets
+      run: |
+        echo "DB_DRIVER=postgres" >> app.env
+        echo "DB_SOURCE=${{ secrets.DB_SOURCE }}" >> app.env
+        echo "SERVER_ADDRESS=0.0.0.0:8080" >> app.env
+        echo "TOKEN_SYMMETRIC_KEY=${{ secrets.TOKEN_SYMMETRIC_KEY }}" >> app.env
+        echo "ACCESS_TOKEN_DURATION=15m" >> app.env
+        echo "REFRESH_TOKEN_DURATION=24h" >> app.env
+
     - name: Run migrations
       run: make migrateup
 
-    - name: Test
+    - name: Run tests
       run: make test
