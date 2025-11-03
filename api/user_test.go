@@ -17,9 +17,9 @@ import (
 	"backend/go-simple-bank/util"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang/mock/gomock"
 	"github.com/lib/pq"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/mock/gomock"
 )
 
 type eqCreateUserParamsMatcher struct {

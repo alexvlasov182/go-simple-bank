@@ -12,7 +12,7 @@ import (
 	"github.com/lib/pq"
 )
 
-// Request и Response для регистрации
+// Request и Response for registration
 type createUserRequest struct {
 	Username string `json:"username" binding:"required,alphanum"`
 	Password string `json:"password" binding:"required,min=6"`
