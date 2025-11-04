@@ -2,14 +2,14 @@ name: Deploy to production
 
 on:
   push:
-    branches: [main] # или release
+    branches: [main] # или release, если отдельный поток
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out code
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Install kubectl
@@ -25,12 +25,11 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: eu-central-1
 
-      - name: Login to Amazon ECR Public
-        run: |
-          aws ecr-public get-login-password --region us-east-1 \
-            | docker login --username AWS --password-stdin public.ecr.aws/x7a4f1l0
+      - name: Login to Amazon ECR (private)
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Load secrets and save to app.env
         run: |
@@ -38,9 +37,9 @@ jobs:
             --query SecretString --output text \
             | jq -r 'to_entries|map("\(.key)=\(.value)")|.[]' > app.env
 
-      - name: Build, tag, and push image to ECR
+      - name: Build, tag, and push Docker image to ECR
         env:
-          ECR_REGISTRY: public.ecr.aws/x7a4f1l0
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: simplebank
           IMAGE_TAG: ${{ github.sha }}
         run: |
@@ -51,10 +50,10 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
-      - name: Update kubeconfig
+      - name: Update kubeconfig for EKS
         run: aws eks update-kubeconfig --name simple-bank-eks --region eu-central-1
 
-      - name: Deploy image to Amazon EKS
+      - name: Deploy to EKS
         run: |
           kubectl apply -f eks/aws-auth.yaml
           kubectl apply -f eks/deployment.yaml
