@@ -2,7 +2,7 @@ name: Deploy to production
 
 on:
   push:
-    branches: [main] # или "release" если хочешь отдельный поток
+    branches: [main] # или release
 
 jobs:
   deploy:
@@ -25,13 +25,12 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-central-1
+          aws-region: us-east-1
 
       - name: Login to Amazon ECR Public
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-        with:
-          registry-type: public
+        run: |
+          aws ecr-public get-login-password --region us-east-1 \
+            | docker login --username AWS --password-stdin public.ecr.aws/x7a4f1l0
 
       - name: Load secrets and save to app.env
         run: |
@@ -39,7 +38,7 @@ jobs:
             --query SecretString --output text \
             | jq -r 'to_entries|map("\(.key)=\(.value)")|.[]' > app.env
 
-      - name: Build, tag, and push image to Amazon ECR Public
+      - name: Build, tag, and push image to ECR
         env:
           ECR_REGISTRY: public.ecr.aws/x7a4f1l0
           ECR_REPOSITORY: simplebank
