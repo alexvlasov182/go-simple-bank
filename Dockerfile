@@ -24,9 +24,9 @@ RUN apk add --no-cache bash netcat-openbsd
 
 COPY --from=builder /app/main .
 COPY --from=builder /app/migrate ./migrate
+COPY app.env .
 COPY start.sh .
 COPY wait-for-it.sh .
-COPY app.env .
 COPY db/migration ./migration
 
 RUN chmod +x ./start.sh ./wait-for-it.sh ./migrate
