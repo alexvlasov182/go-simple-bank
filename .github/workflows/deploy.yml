@@ -31,6 +31,8 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Some test
+        run: echo "Deploy to production started"
       - name: Load secrets and save to app.env
         run: |
           aws secretsmanager get-secret-value --secret-id simple_bank \
