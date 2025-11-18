@@ -20,3 +20,7 @@
 Thumbs.db
 
 app.env
+
+# AWS secretes
+eks/deployment.yaml
+eks/aws-auth.yaml
