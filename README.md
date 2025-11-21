@@ -542,7 +542,7 @@ For GitHub Actions, credentials are stored as repository secrets and injected at
 Answer: "I follow a systematic approach:
   1. Check pod status: <code>kubectl get pods</code> - look for CrashLoopBackOff, ImagePullBackOff
   2. View pod logs: <code>kubectl logs <pod-name></code> - see application errors
-  3. Describe pod: <code>kubectl describe pod <pod-name> - check events and resource limits
+  3. Describe pod: <code>kubectl describe pod <pod-name></code> - check events and resource limits
   4. Check resources: <code>kubectl top pods</code> - verify CPU/memory usage
   5. Access pod: <code>kubectl exec -it <pod-name> -- /bin/sh </code> - debug interactively
   6. Network debugging: Test connectivity to external services(DB, APIs)
