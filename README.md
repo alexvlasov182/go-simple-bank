@@ -770,6 +770,7 @@ k9s
 
 What You Learned:
 
+```bash
 ✅ Container Orchestration: How Kubernetes manages containerized applications at scale
 ✅ Cloud Native Architecture: Designing applications for cloud environments
 ✅ Infrastructure Management: Setting up and maintaining AWS resources
@@ -777,6 +778,7 @@ What You Learned:
 ✅ Security: IAM, secrets management, network policies
 ✅ Troubleshooting: Systematic debugging of distributed systems
 ✅ Scalability: Horizontal scaling, load balancing, auto-scaling
+```
 
 Be Ready to Discuss:
 - Why you chose EKS over other platforms (ECS, EC2, serverless)
@@ -821,12 +823,13 @@ curl -X GET "$API_URL/accounts?page_id=1&page_size=10" \
 
 ## 📝 Conclusion
 This project demonstrates a production-grade deployment of a microservice on AWS with:
-
+```bash
 ✅ Automated CI/CD reducing deployment time from hours to minutes
 ✅ High availability with multi-pod, multi-AZ architecture
 ✅ Security following AWS and Kubernetes best practices
 ✅ Scalability handling increased load automatically
 ✅ Observability with logs, metrics, and health checks
+```
 
 The experience gained here directly translates to real-world DevOps and Cloud Engineering roles.
 
