@@ -26,17 +26,20 @@ This porject demonstratets a complete production deployment of a Go-based bankin
 - Load Balancing: AWS Elastic Load Balancer
 - Infrastructure: Fully automated deployment pipeline
 
-Key Features
+```bash
+# Key Features
 ✅Automated CI/CD pipeline with GitHub Actions
 ✅Horizontal scaling with Kubernetes(2 replicas)
 ✅Database migrations handled automatically
 ✅JWT-based authentication
 ✅Production-grade security with IAM roles
 ✅External access via LoadBalancer
+```
 
 ---
 
 ## 🏗️ Architecture
+```bash
 ┌─────────────────────────────────────────────────────────────┐
 │                        GitHub Actions                       │
 │  (Build → Test → Push to ECR → Deploy to EKS)               │
@@ -78,6 +81,7 @@ Key Features
                     │  Amazon RDS   │
                     │  (PostgreSQL) │
                     └───────────────┘
+```
 
 
 ## Prerequistes
